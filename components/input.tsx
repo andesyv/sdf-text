@@ -1,24 +1,22 @@
-import React from "react";
-import { Props as RenderProps } from './renderer'
+import React from 'react';
+import { Line } from './webglcanvas';
 
 interface Props {
-  onInputChanged?: (renderData: RenderProps) => void
+  onInputChanged?: (renderData: Line[]) => void;
 }
 
 interface State {
   value: string;
 }
 
-const ExtractLineData = (text: string): RenderProps => {
-  return {};
-}
+const ExtractLineData = (text: string): Line[] => [];
 
 // Form that autoselects
 class Input extends React.PureComponent<Props, State> {
   constructor(props: Props) {
     super(props);
     this.state = { value: '' };
-    this.handleSubmit.bind(this)
+    this.handleSubmit.bind(this);
     this.handleChange.bind(this);
   }
 
@@ -27,17 +25,17 @@ class Input extends React.PureComponent<Props, State> {
   componentDidMount = () => {
     this.inputRef.current?.focus();
     this.inputRef.current?.select();
-  }
+  };
 
   handleSubmit: React.FormEventHandler<HTMLFormElement> = (ev) => {
     this.props.onInputChanged?.(ExtractLineData(this.state.value));
     ev.preventDefault();
-  }
+  };
 
   handleChange: React.ChangeEventHandler<HTMLInputElement> = (event) => {
     this.setState({ value: event.target.value });
     event.preventDefault();
-  }
+  };
 
   render = () => (
     <form onSubmit={this.handleSubmit}>
@@ -48,6 +46,6 @@ class Input extends React.PureComponent<Props, State> {
       <input type="submit" value="Submit" />
     </form>
   );
-};
+}
 
 export default Input;

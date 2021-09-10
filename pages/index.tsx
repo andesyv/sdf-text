@@ -1,15 +1,21 @@
-import type { NextPage } from 'next'
-import Head from 'next/head'
-import Image from 'next/image'
-import { useState } from 'react'
+import type { NextPage, GetServerSideProps, InferGetServerSidePropsType } from 'next';
+import Head from 'next/head';
+import Image from 'next/image';
+import { useState } from 'react';
+import fs from 'fs';
 
-import Input from '../components/input'
-import Renderer, { Props as RenderProps } from '../components/renderer'
+import Input from '../components/input';
+import WebGLCanvas, { Line } from '../components/webglcanvas';
 
-import styles from '../styles/Home.module.css'
+import styles from '../styles/Home.module.css';
+import { LineStrip } from 'three';
 
-const Home: NextPage = () => {
-  const [renderData, setRenderData] = useState<RenderProps>({});
+interface PageProps {
+  shaderStr: string;
+}
+
+const Home: NextPage<PageProps> = ({ shaderStr }) => {
+  const [renderData, setRenderData] = useState<Line[]>([]);
 
   return (
     <div className={styles.container}>
@@ -25,8 +31,12 @@ const Home: NextPage = () => {
         </h1>
 
         <Input onInputChanged={setRenderData} />
-        <Renderer {...renderData} />
-
+        <WebGLCanvas
+          shaderCode={shaderStr}
+          width={500}
+          height={500}
+          lines={renderData.length ? renderData : undefined}
+        />
       </main>
 
       <footer className={styles.footer}>
@@ -42,7 +52,17 @@ const Home: NextPage = () => {
         </a>
       </footer>
     </div>
-  )
-}
+  );
+};
 
-export default Home
+export const getServerSideProps: GetServerSideProps<PageProps> = async () => {
+  const fileContent = new Promise<string>((resolve, reject) => {
+    fs.readFile(`${process.cwd()}/public/shader.glsl`, (err, data) => {
+      if (err) reject(err);
+      resolve(data.toString());
+    });
+  });
+  return { props: { shaderStr: await fileContent } };
+};
+
+export default Home;
