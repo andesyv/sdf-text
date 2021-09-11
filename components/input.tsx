@@ -1,34 +1,37 @@
 import React from 'react';
+import Router from 'next/router';
 import { Line } from './webglcanvas';
+import TextToSVG, { GenerationOptions } from 'text-to-svg';
 
-interface Props {
-  onInputChanged?: (renderData: Line[]) => void;
+export interface Props {
+  text: string;
+  font: string;
 }
 
 interface State {
   value: string;
 }
 
-const ExtractLineData = (text: string): Line[] => [];
-
 // Form that autoselects
 class Input extends React.PureComponent<Props, State> {
   constructor(props: Props) {
     super(props);
-    this.state = { value: '' };
+    this.state = {
+      value: '',
+    };
     this.handleSubmit.bind(this);
     this.handleChange.bind(this);
   }
 
   inputRef = React.createRef<HTMLInputElement>();
 
-  componentDidMount = () => {
+  componentDidMount = (): void => {
     this.inputRef.current?.focus();
     this.inputRef.current?.select();
   };
 
   handleSubmit: React.FormEventHandler<HTMLFormElement> = (ev) => {
-    this.props.onInputChanged?.(ExtractLineData(this.state.value));
+    void Router.push(`/${this.state.value}`);
     ev.preventDefault();
   };
 
@@ -37,7 +40,7 @@ class Input extends React.PureComponent<Props, State> {
     event.preventDefault();
   };
 
-  render = () => (
+  render = (): JSX.Element => (
     <form onSubmit={this.handleSubmit}>
       <label>
         Name:

@@ -1,21 +1,31 @@
-import type { NextPage, GetServerSideProps, InferGetServerSidePropsType } from 'next';
+import type { NextPage, GetServerSideProps } from 'next';
 import Head from 'next/head';
 import Image from 'next/image';
 import { useState } from 'react';
 import fs from 'fs';
+import TextToSVG, { GenerationOptions, loadSync } from 'text-to-svg';
 
 import Input from '../components/input';
 import WebGLCanvas, { Line } from '../components/webglcanvas';
 
 import styles from '../styles/Home.module.css';
-import { LineStrip } from 'three';
+import { useRouter } from 'next/dist/client/router';
+import { queryParamFlatten, textToSVG } from '../lib/utils';
 
 interface PageProps {
   shaderStr: string;
+  svg: string;
 }
+
+const defaultSettings = {
+  text: 'Hello',
+  font: 'default',
+};
 
 const Home: NextPage<PageProps> = ({ shaderStr }) => {
   const [renderData, setRenderData] = useState<Line[]>([]);
+  const router = useRouter();
+  const { text, font } = router.query;
 
   return (
     <div className={styles.container}>
@@ -30,7 +40,10 @@ const Home: NextPage<PageProps> = ({ shaderStr }) => {
           Welcome to <a href="https://nextjs.org">Next.js!</a>
         </h1>
 
-        <Input onInputChanged={setRenderData} />
+        <Input
+          text={queryParamFlatten(text, defaultSettings.text)}
+          font={queryParamFlatten(font, defaultSettings.font)}
+        />
         <WebGLCanvas
           shaderCode={shaderStr}
           width={500}
@@ -55,14 +68,23 @@ const Home: NextPage<PageProps> = ({ shaderStr }) => {
   );
 };
 
-export const getServerSideProps: GetServerSideProps<PageProps> = async () => {
+export const getServerSideProps: GetServerSideProps<PageProps> = async ({ params }) => {
+  // Would want this part in getStaticProps, but Next.js doesn't support it together with getServerSideProps
   const fileContent = new Promise<string>((resolve, reject) => {
     fs.readFile(`${process.cwd()}/public/shader.glsl`, (err, data) => {
       if (err) reject(err);
       resolve(data.toString());
     });
   });
-  return { props: { shaderStr: await fileContent } };
+
+  const queryParams = params ?? defaultSettings;
+  const text = queryParamFlatten(queryParams.text, defaultSettings.text);
+  // TODO: Fill in font fetching logic
+  const font = queryParamFlatten(queryParams.font, defaultSettings.font);
+  const convertedText = await textToSVG(text, font);
+  console.log(convertedText);
+
+  return { props: { shaderStr: await fileContent, svg: convertedText } };
 };
 
 export default Home;
