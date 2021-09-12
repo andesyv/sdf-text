@@ -17,7 +17,7 @@ interface PageProps {
   svg: string;
 }
 
-const defaultSettings = {
+export const defaultSettings = {
   text: 'Hello',
   font: 'default',
 };
