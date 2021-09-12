@@ -1,7 +1,5 @@
 import React from 'react';
 import Router from 'next/router';
-import { Line } from './webglcanvas';
-import TextToSVG, { GenerationOptions } from 'text-to-svg';
 
 export interface Props {
   text: string;

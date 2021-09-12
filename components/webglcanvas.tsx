@@ -1,7 +1,7 @@
-import React, { Suspense, useRef } from 'react';
+import React, { Suspense } from 'react';
 import * as Three from 'three';
 import { Canvas, extend, ShaderMaterialProps, useFrame } from '@react-three/fiber';
-import { DateTime, Duration, Interval } from 'luxon';
+import { DateTime, Interval } from 'luxon';
 
 export interface Line {
   from: Three.Vector3;
@@ -71,61 +71,5 @@ const WebGLCanvas: React.FC<Props> = (props) => (
     </Suspense>
   </Canvas>
 );
-
-// class WebGLCanvas extends React.PureComponent<Props> {
-//     canvasRef = React.createRef<HTMLCanvasElement>();
-//     renderer?: Three.WebGLRenderer = undefined;
-
-// componentDidMount = () => {
-//     if (!this.canvasRef.current)
-//         return;
-//     const c = this.canvasRef.current;
-
-//     this.renderer = new Three.WebGLRenderer({ canvas: c });
-//     this.renderer.setSize(c.width, c.height, false);
-//     this.renderer.autoClear = false;
-//     const camera = new Three.OrthographicCamera(-1, 1, 1, -1, -1, 1);
-//     const scene = new Three.Scene();
-//     const plane = new Three.PlaneBufferGeometry(2, 2);
-//     const uniforms = {
-//         iTime: { value: 0 },
-//         iResolution: { value: new Three.Vector3() },
-//     };
-//     const material = new Three.ShaderMaterial({
-//         fragmentShader: "/shader.glsl",
-//         uniforms: uniforms,
-//     });
-//     scene.add(new Three.Mesh(plane, material));
-
-//     const renderWebGL = (time: number) => {
-//         // resizeRendererToDisplaySize(this.renderer);
-
-//         uniforms.iResolution.value.set(c.width, c.height, 1);
-//         uniforms.iTime.value = time * 0.001; // Time is in milliseconds
-
-//         this.renderer?.render(scene, camera);
-
-//         // requestAnimationFrame(renderWebGL);
-//     };
-
-//     requestAnimationFrame(renderWebGL);
-// }
-
-//     render = () => (
-
-//     );
-// };
-
-const resizeRendererToDisplaySize = (renderer?: Three.WebGLRenderer): boolean => {
-  if (!renderer) return false;
-  const canvas = renderer.domElement;
-  const width = canvas.clientWidth;
-  const height = canvas.clientHeight;
-  const needResize = canvas.width !== width || canvas.height !== height;
-  if (needResize) {
-    renderer.setSize(width, height, false);
-  }
-  return needResize;
-};
 
 export default WebGLCanvas;

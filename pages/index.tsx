@@ -3,7 +3,6 @@ import Head from 'next/head';
 import Image from 'next/image';
 import { useState } from 'react';
 import fs from 'fs';
-import TextToSVG, { GenerationOptions, loadSync } from 'text-to-svg';
 
 import Input from '../components/input';
 import WebGLCanvas, { Line } from '../components/webglcanvas';
