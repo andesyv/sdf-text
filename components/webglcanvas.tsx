@@ -2,6 +2,7 @@ import React, { Suspense } from 'react';
 import * as Three from 'three';
 import { Canvas, extend, ShaderMaterialProps, useFrame } from '@react-three/fiber';
 import { DateTime, Interval } from 'luxon';
+import { Line as Line2D } from '../lib/utils';
 
 export interface Line {
   from: Three.Vector3;
@@ -12,7 +13,13 @@ export interface Props {
   shaderCode: string;
   width: number;
   height: number;
-  lines?: Line[];
+  lines?: Line2D[][];
+}
+
+interface ImagePlaneProps {
+  shaderCode: string;
+  width: number;
+  height: number;
 }
 
 /// https://stackoverflow.com/questions/65459024/shaders-with-typescript-and-react-three-fiber
@@ -29,12 +36,6 @@ class ScreenSpaceMaterial extends Three.ShaderMaterial {
 }
 
 extend({ ScreenSpaceMaterial });
-
-interface ImagePlaneProps {
-  shaderCode: string;
-  width: number;
-  height: number;
-}
 
 const ImagePlane: React.FC<ImagePlaneProps> = ({ shaderCode, width, height }) => {
   const ref = React.createRef<ShaderMaterialProps>();

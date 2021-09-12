@@ -1,19 +1,18 @@
 import type { NextPage, GetServerSideProps } from 'next';
 import Head from 'next/head';
 import Image from 'next/image';
-import { useState } from 'react';
 import fs from 'fs';
 
 import Input from '../components/input';
-import WebGLCanvas, { Line } from '../components/webglcanvas';
+import WebGLCanvas from '../components/webglcanvas';
 
 import styles from '../styles/Home.module.css';
 import { useRouter } from 'next/dist/client/router';
-import { queryParamFlatten, textToSVG } from '../lib/utils';
+import { queryParamFlatten, Line, textToLines } from '../lib/utils';
 
 interface PageProps {
   shaderStr: string;
-  svgElement: string;
+  lines: Line[][];
 }
 
 export const defaultSettings = {
@@ -21,8 +20,7 @@ export const defaultSettings = {
   font: 'default',
 };
 
-const Home: NextPage<PageProps> = ({ shaderStr, svgElement }) => {
-  const [renderData, setRenderData] = useState<Line[]>([]);
+const Home: NextPage<PageProps> = ({ shaderStr, lines }) => {
   const router = useRouter();
   const { text, font } = router.query;
 
@@ -43,13 +41,12 @@ const Home: NextPage<PageProps> = ({ shaderStr, svgElement }) => {
           text={queryParamFlatten(text, defaultSettings.text)}
           font={queryParamFlatten(font, defaultSettings.font)}
         />
-        {/* <WebGLCanvas
+        <WebGLCanvas
           shaderCode={shaderStr}
           width={500}
           height={500}
-          lines={renderData.length ? renderData : undefined}
-        /> */}
-        <svg dangerouslySetInnerHTML={{ __html: svgElement }} />
+          lines={lines.length ? lines : undefined}
+        />
       </main>
 
       <footer className={styles.footer}>
@@ -81,10 +78,10 @@ export const getServerSideProps: GetServerSideProps<PageProps> = async ({ params
   const text = queryParamFlatten(queryParams.text, defaultSettings.text);
   // TODO: Fill in font fetching logic
   const font = queryParamFlatten(queryParams.font, defaultSettings.font);
-  const convertedText = await textToSVG(text, font);
-  console.log(convertedText);
+  const convertedLines = await textToLines(text, font, 100, 0.1);
+  console.log(convertedLines);
 
-  return { props: { shaderStr: await fileContent, svgElement: convertedText } };
+  return { props: { shaderStr: await fileContent, lines: convertedLines } };
 };
 
 export default Home;

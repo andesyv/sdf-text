@@ -34,8 +34,13 @@ export const textToSVG = async (text: string, font: string): Promise<string> =>
     resolve(svg);
   });
 
+/// Might be more readable with "function first<T>(list: Array<T>): (T | undefined)"
+const first = <T extends unknown>(list: Array<T> | null): T | null =>
+  Array.isArray(list) && list.length ? list[0] : null;
+
 const getPathFromSVG = (svgContent: string): string | undefined => {
-  const m = /d=".+"/.exec(svgContent)?.at(0);
+  const r = /d=".+"/;
+  const m = first(r.exec(svgContent));
   return m?.substr(3, m?.length ?? 0 - 4); // Trim away start d=" and trailing "
 };
 
@@ -65,19 +70,21 @@ export const textToLines = async (
   font: string,
   discretizeCount: number,
   simplifyTolerance: number
-): Promise<Point[][]> => {
+): Promise<Line[][]> => {
   const svgContent = await textToSVG(text, font);
-  return simplifyPath(
-    discretizePath(getPathFromSVG(svgContent) ?? '', discretizeCount),
-    simplifyTolerance
+  return toLines(
+    simplifyPath(
+      discretizePath(getPathFromSVG(svgContent) ?? '', discretizeCount),
+      simplifyTolerance
+    )
   );
 };
 
-// const toLines = (pointList: Point[][]): Line[][] =>
-//   pointList.map((points) => {
-//     const outs = new Array<Line>(points.length - 1);
-//     for (let i = 0; i < points.length - 1; i++) {
-//       outs[i] = { from: points[i], to: points[i + 1] };
-//     }
-//     return outs;
-//   });
+const toLines = (pointList: Point[][]): Line[][] =>
+  pointList.map((points) => {
+    const outs = new Array<Line>(points.length - 1);
+    for (let i = 0; i < points.length - 1; i++) {
+      outs[i] = { from: points[i], to: points[i + 1] };
+    }
+    return outs;
+  });
