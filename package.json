@@ -14,6 +14,8 @@
     "next": "11.1.2",
     "react": "17.0.2",
     "react-dom": "17.0.2",
+    "simplify-js": "https://github.com/mourner/simplify-js#v1.2.4",
+    "svg-path-properties": "^1.0.11",
     "text-to-svg": "^3.1.5",
     "three": "^0.132.2"
   },

@@ -14,7 +14,7 @@ import { queryParamFlatten, textToSVG } from '../lib/utils';
 
 interface PageProps {
   shaderStr: string;
-  svg: string;
+  svgElement: string;
 }
 
 export const defaultSettings = {
@@ -22,7 +22,7 @@ export const defaultSettings = {
   font: 'default',
 };
 
-const Home: NextPage<PageProps> = ({ shaderStr }) => {
+const Home: NextPage<PageProps> = ({ shaderStr, svgElement }) => {
   const [renderData, setRenderData] = useState<Line[]>([]);
   const router = useRouter();
   const { text, font } = router.query;
@@ -44,12 +44,13 @@ const Home: NextPage<PageProps> = ({ shaderStr }) => {
           text={queryParamFlatten(text, defaultSettings.text)}
           font={queryParamFlatten(font, defaultSettings.font)}
         />
-        <WebGLCanvas
+        {/* <WebGLCanvas
           shaderCode={shaderStr}
           width={500}
           height={500}
           lines={renderData.length ? renderData : undefined}
-        />
+        /> */}
+        <svg dangerouslySetInnerHTML={{ __html: svgElement }} />
       </main>
 
       <footer className={styles.footer}>
@@ -84,7 +85,7 @@ export const getServerSideProps: GetServerSideProps<PageProps> = async ({ params
   const convertedText = await textToSVG(text, font);
   console.log(convertedText);
 
-  return { props: { shaderStr: await fileContent, svg: convertedText } };
+  return { props: { shaderStr: await fileContent, svgElement: convertedText } };
 };
 
 export default Home;

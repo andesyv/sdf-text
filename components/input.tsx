@@ -17,7 +17,7 @@ class Input extends React.PureComponent<Props, State> {
   constructor(props: Props) {
     super(props);
     this.state = {
-      value: '',
+      value: this.props.text,
     };
     this.handleSubmit.bind(this);
     this.handleChange.bind(this);
@@ -44,7 +44,13 @@ class Input extends React.PureComponent<Props, State> {
     <form onSubmit={this.handleSubmit}>
       <label>
         Name:
-        <input ref={this.inputRef} type="text" name="name" onChange={this.handleChange} />
+        <input
+          ref={this.inputRef}
+          type="text"
+          name="name"
+          onChange={this.handleChange}
+          value={this.state.value}
+        />
       </label>
       <input type="submit" value="Submit" />
     </form>
