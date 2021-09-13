@@ -20,6 +20,7 @@ interface ImagePlaneProps {
   shaderCode: string;
   width: number;
   height: number;
+  lines: Float32Array;
 }
 
 /// https://stackoverflow.com/questions/65459024/shaders-with-typescript-and-react-three-fiber
@@ -37,7 +38,7 @@ class ScreenSpaceMaterial extends Three.ShaderMaterial {
 
 extend({ ScreenSpaceMaterial });
 
-const ImagePlane: React.FC<ImagePlaneProps> = ({ shaderCode, width, height }) => {
+const ImagePlane: React.FC<ImagePlaneProps> = ({ shaderCode, width, height, lines }) => {
   const ref = React.createRef<ShaderMaterialProps>();
   const start = DateTime.now();
   useFrame(() => {
@@ -49,12 +50,12 @@ const ImagePlane: React.FC<ImagePlaneProps> = ({ shaderCode, width, height }) =>
   return (
     <mesh>
       <planeGeometry args={[2, 2]} />
-      {/* <screenSpaceMaterial /> */}
       <shaderMaterial
         ref={ref}
         uniforms={{
           iResolution: { value: new Three.Vector3(width, height, 0.0) },
           iTime: { value: 0.0 },
+          lines: { value: lines.length ? lines : [] },
         }}
         fragmentShader={shaderCode}
       />
@@ -62,15 +63,40 @@ const ImagePlane: React.FC<ImagePlaneProps> = ({ shaderCode, width, height }) =>
   );
 };
 
-const WebGLCanvas: React.FC<Props> = (props) => (
-  <Canvas
-    camera={new Three.OrthographicCamera(-1, 1, 1, -1, -1, 1)}
-    style={{ width: props.width, height: props.height }}
-  >
-    <Suspense fallback={null}>
-      <ImagePlane {...props} />
-    </Suspense>
-  </Canvas>
-);
+const nestedCount = <T extends unknown>(list: T[][] | undefined): number =>
+  list?.reduce((sum, l) => sum + l.length, 0) ?? 0;
+
+const WebGLCanvas: React.FC<Props> = (props) => {
+  const lines = new Float32Array(nestedCount(props.lines) * 4);
+  if (props.lines) {
+    let totalLength = 0;
+    for (let i = 0; i < props.lines.length; i++) {
+      const segment = props.lines[i];
+      for (let j = 0, k = totalLength; j < segment.length; j++, k += 4) {
+        lines[k] = segment[j].from.x;
+        lines[k + 1] = segment[j].from.y;
+        lines[k + 2] = segment[j].to.x;
+        lines[k + 3] = segment[j].to.y;
+      }
+      totalLength += segment.length * 4;
+    }
+  }
+
+  return (
+    <Canvas
+      camera={new Three.OrthographicCamera(-1, 1, 1, -1, -1, 1)}
+      style={{ width: props.width, height: props.height }}
+    >
+      <Suspense fallback={null}>
+        <ImagePlane
+          shaderCode={props.shaderCode}
+          width={props.width}
+          height={props.height}
+          lines={lines}
+        />
+      </Suspense>
+    </Canvas>
+  );
+};
 
 export default WebGLCanvas;
