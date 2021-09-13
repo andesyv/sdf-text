@@ -79,6 +79,42 @@ const isZero = ({ from, to }: Line): boolean =>
 const clearEmptyLines = (lines: Line[][]): Line[][] =>
   lines.map((lines) => lines.filter((l) => !isZero(l))).filter((l) => l.length !== 0);
 
+const normalizeRange = (lines: Line[][]): Line[][] => {
+  const min = { x: 10000, y: 10000 };
+  const max = { x: -10000, y: -10000 };
+  for (const li of lines) {
+    for (const l of li) {
+      min.x = Math.min(l.from.x, l.to.x, min.x);
+      min.y = Math.min(l.from.y, l.to.y, min.y);
+      max.x = Math.max(l.from.x, l.to.x, max.x);
+      max.y = Math.max(l.from.y, l.to.y, max.y);
+    }
+  }
+
+  // f(x) = ax + b = y
+  // a * min + b = range.min
+  // a * max + b = range.max => b = range.max - a * max
+  // a * min + range.max - a * max = range.min => a * (min - max) = range.min - range.max
+  // a = (range.min - range.max) / (min - max)
+  // b = range.max - a * max
+  const range = { min: -3, max: 3 };
+  const a = {
+    x: (range.min - range.max) / (min.x - max.x),
+    y: (range.min - range.max) / (min.y - max.y),
+  };
+  const b = { x: range.max - a.x * max.x, y: range.max - a.y * max.y };
+
+  return lines.map((li) =>
+    li.map(
+      (l): Line => ({
+        // Also flip y coordinates, because OpenGL is opposite of html
+        from: { x: a.x * l.from.x + b.x, y: -(a.y * l.from.y + b.y) },
+        to: { x: a.x * l.to.x + b.x, y: -(a.y * l.to.y + b.y) },
+      })
+    )
+  );
+};
+
 export const textToLines = async (
   text: string,
   font: string,
@@ -87,11 +123,13 @@ export const textToLines = async (
 ): Promise<Line[][]> => {
   const svgContent = await textToSVG(text, font);
 
-  return clearEmptyLines(
-    toLines(
-      simplifyPath(
-        discretizePath(splitPathIntoSegments(getPathFromSVG(svgContent)), discretizeCount),
-        simplifyTolerance
+  return normalizeRange(
+    clearEmptyLines(
+      toLines(
+        simplifyPath(
+          discretizePath(splitPathIntoSegments(getPathFromSVG(svgContent)), discretizeCount),
+          simplifyTolerance
+        )
       )
     )
   );

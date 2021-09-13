@@ -3,7 +3,7 @@ import Head from 'next/head';
 import Image from 'next/image';
 
 import Input from '../components/input';
-import WebGLCanvas from '../components/webglcanvas';
+import WebGLCanvas, { nestedCount } from '../components/webglcanvas';
 
 import styles from '../styles/Home.module.css';
 import { useRouter } from 'next/dist/client/router';
@@ -67,19 +67,22 @@ const Home: NextPage<PageProps> = ({ shaderStr, lines }) => {
 };
 
 export const getServerSideProps: GetServerSideProps<PageProps> = async ({ params }) => {
-  // Would want this part in getStaticProps, but Next.js doesn't support it together with getServerSideProps
-  const shader = new Promise<string>((resolve, reject) => {
-    fs.readFile(`${process.cwd()}/public/shader.glsl`, (err, data) => {
-      if (err) reject(err);
-      resolve(data.toString());
-    });
-  });
-
   const queryParams = params ?? defaultSettings;
   const text = queryParamFlatten(queryParams.text, defaultSettings.text);
   // TODO: Fill in font fetching logic
   const font = queryParamFlatten(queryParams.font, defaultSettings.font);
-  const convertedLines = await textToLines(text, font, 1000, 0.1);
+  const convertedLines = await textToLines(text, font, 100, 2.4);
+  const lineCount = nestedCount(convertedLines);
+  console.log(`Line count: ${lineCount}`);
+
+  // Would want this part in getStaticProps, but Next.js doesn't support it together with getServerSideProps
+  const shader = new Promise<string>((resolve, reject) => {
+    fs.readFile(`${process.cwd()}/public/shader.glsl`, (err, data) => {
+      if (err) reject(err);
+      const file = data.toString();
+      resolve(file.replace('@LINE_COUNT@', lineCount.toString()));
+    });
+  });
 
   return { props: { shaderStr: await shader, lines: convertedLines } };
 };

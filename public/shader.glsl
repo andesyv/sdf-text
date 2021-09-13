@@ -2,7 +2,7 @@
 
 #define MAX_STEPS 100
 #define EPS 0.01
-#define LINE_COUNT 100
+#define LINE_COUNT @LINE_COUNT@
 const float tanCoefficients = 0.5 * (PI / 180.0);
 
 struct Line {
@@ -13,7 +13,7 @@ struct Line {
 
 uniform vec3 iResolution;
 uniform float iTime;
-// uniform vec4 lines[LINE_COUNT];
+uniform Line lines[LINE_COUNT];
 
 mat4 perspective(float n, float f, float aspect, float FOV) {
     float S = 1.0 / tan(FOV * tanCoefficients);
@@ -67,11 +67,6 @@ vec3 gradient(Line l, vec3 p) {
     );
 }
 
-Line lines[2] = Line[2](
-    Line(vec3(-3.0, -3.0, 0.0), vec3(3.0, 3.0, 0.2), 1.0),
-    Line(vec3(-0.3, -0.4, -2.0), vec3(1.0, 1.0, 0.2), 0.5)
-);
-
 // polynomial smooth min (k = 0.1);
 float smin( float a, float b, float k )
 {
@@ -115,7 +110,7 @@ void mainImage(out vec4 fragColor, in vec2 texCoords) {
         float dist = farDist;
         int closestId = 0;
         vec3 g;
-        for (int j = 0; j < 2; j++) {
+        for (int j = 0; j < LINE_COUNT; j++) {
             float d = sdf(lines[j], p);
             dist = smin(d, dist, 0.5);
             if (d < dist) {
