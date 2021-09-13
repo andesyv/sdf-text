@@ -1,14 +1,15 @@
 import type { NextPage, GetServerSideProps } from 'next';
 import Head from 'next/head';
 import Image from 'next/image';
-import fs from 'fs';
 
 import Input from '../components/input';
 import WebGLCanvas from '../components/webglcanvas';
 
 import styles from '../styles/Home.module.css';
 import { useRouter } from 'next/dist/client/router';
-import { queryParamFlatten, Line, textToLines } from '../lib/utils';
+import { queryParamFlatten, textToLines } from '../lib/utils';
+import type { Line2D as Line } from '../lib/types';
+import fs from 'fs';
 
 interface PageProps {
   shaderStr: string;
@@ -67,7 +68,7 @@ const Home: NextPage<PageProps> = ({ shaderStr, lines }) => {
 
 export const getServerSideProps: GetServerSideProps<PageProps> = async ({ params }) => {
   // Would want this part in getStaticProps, but Next.js doesn't support it together with getServerSideProps
-  const fileContent = new Promise<string>((resolve, reject) => {
+  const shader = new Promise<string>((resolve, reject) => {
     fs.readFile(`${process.cwd()}/public/shader.glsl`, (err, data) => {
       if (err) reject(err);
       resolve(data.toString());
@@ -80,7 +81,7 @@ export const getServerSideProps: GetServerSideProps<PageProps> = async ({ params
   const font = queryParamFlatten(queryParams.font, defaultSettings.font);
   const convertedLines = await textToLines(text, font, 1000, 0.1);
 
-  return { props: { shaderStr: await fileContent, lines: convertedLines } };
+  return { props: { shaderStr: await shader, lines: convertedLines } };
 };
 
 export default Home;

@@ -2,7 +2,7 @@ import React, { Suspense } from 'react';
 import * as Three from 'three';
 import { Canvas, extend, ShaderMaterialProps, useFrame } from '@react-three/fiber';
 import { DateTime, Interval } from 'luxon';
-import { Line as Line2D } from '../lib/utils';
+import { Line2D } from '../lib/types';
 
 export interface Line {
   from: Three.Vector3;
@@ -63,24 +63,29 @@ const ImagePlane: React.FC<ImagePlaneProps> = ({ shaderCode, width, height, line
   );
 };
 
-const nestedCount = <T extends unknown>(list: T[][] | undefined): number =>
+const nestedCount = <T extends unknown>(list?: T[][]): number =>
   list?.reduce((sum, l) => sum + l.length, 0) ?? 0;
 
-const WebGLCanvas: React.FC<Props> = (props) => {
-  const lines = new Float32Array(nestedCount(props.lines) * 4);
-  if (props.lines) {
+const linesToTypedArray = (lines?: Line2D[][]): Float32Array => {
+  const arr = new Float32Array(nestedCount(lines) * 4);
+  if (lines) {
     let totalLength = 0;
-    for (let i = 0; i < props.lines.length; i++) {
-      const segment = props.lines[i];
+    for (let i = 0; i < lines.length; i++) {
+      const segment = lines[i];
       for (let j = 0, k = totalLength; j < segment.length; j++, k += 4) {
-        lines[k] = segment[j].from.x;
-        lines[k + 1] = segment[j].from.y;
-        lines[k + 2] = segment[j].to.x;
-        lines[k + 3] = segment[j].to.y;
+        arr[k] = segment[j].from.x;
+        arr[k + 1] = segment[j].from.y;
+        arr[k + 2] = segment[j].to.x;
+        arr[k + 3] = segment[j].to.y;
       }
       totalLength += segment.length * 4;
     }
   }
+  return arr;
+};
+
+const WebGLCanvas: React.FC<Props> = (props) => {
+  const lines = linesToTypedArray(props.lines);
 
   return (
     <Canvas

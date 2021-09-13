@@ -1,18 +1,9 @@
 import { GenerationOptions, loadSync } from 'text-to-svg';
 import simplify from 'simplify-js';
 import { svgPathProperties } from 'svg-path-properties';
+import type { Line2D as Line, Point } from './types';
 
 const EPSILON = 0.01;
-
-export interface Point {
-  x: number;
-  y: number;
-}
-
-export interface Line {
-  from: Point;
-  to: Point;
-}
 
 export const queryParamFlatten = (
   query: string | string[] | undefined,
