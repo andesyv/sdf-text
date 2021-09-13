@@ -78,8 +78,7 @@ export const getServerSideProps: GetServerSideProps<PageProps> = async ({ params
   const text = queryParamFlatten(queryParams.text, defaultSettings.text);
   // TODO: Fill in font fetching logic
   const font = queryParamFlatten(queryParams.font, defaultSettings.font);
-  const convertedLines = await textToLines(text, font, 100, 0.1);
-  console.log(convertedLines);
+  const convertedLines = await textToLines(text, font, 1000, 0.1);
 
   return { props: { shaderStr: await fileContent, lines: convertedLines } };
 };
