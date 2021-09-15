@@ -14,6 +14,8 @@ export interface Props {
   width: number;
   height: number;
   lines?: Line2D[][];
+  radius: number;
+  smoothing: number;
 }
 
 interface ImagePlaneProps {
@@ -21,19 +23,19 @@ interface ImagePlaneProps {
   width: number;
   height: number;
   lines?: Line2D[][];
+  radius: number;
+  smoothing: number;
 }
 
 interface ShaderLine {
   start: Three.Vector3;
   end: Three.Vector3;
-  radius: number;
 }
 
 const p2vec3 = ({ x, y }: { x: number; y: number }): Three.Vector3 => new Three.Vector3(x, y, 0.0);
 const l2shaderline = (line: Line2D): ShaderLine => ({
   start: p2vec3(line.from),
   end: p2vec3(line.to),
-  radius: 0.1,
 });
 
 /// https://stackoverflow.com/questions/65459024/shaders-with-typescript-and-react-three-fiber
@@ -51,14 +53,24 @@ class ScreenSpaceMaterial extends Three.ShaderMaterial {
 
 extend({ ScreenSpaceMaterial });
 
-const ImagePlane: React.FC<ImagePlaneProps> = ({ shaderCode, width, height, lines }) => {
+const ImagePlane: React.FC<ImagePlaneProps> = ({
+  shaderCode,
+  width,
+  height,
+  lines,
+  radius,
+  smoothing,
+}) => {
   const ref = React.createRef<ShaderMaterialProps>();
   const start = DateTime.now();
   useFrame(() => {
-    if (ref.current && ref.current.uniforms)
+    if (ref.current && ref.current.uniforms) {
       ref.current.uniforms.iTime.value = Interval.fromDateTimes(start, DateTime.now()).length(
         'seconds'
       );
+      ref.current.uniforms.radius.value = radius;
+      ref.current.uniforms.smoothing.value = smoothing;
+    }
   });
   return (
     <mesh>
@@ -71,6 +83,8 @@ const ImagePlane: React.FC<ImagePlaneProps> = ({ shaderCode, width, height, line
           lines: {
             value: lines?.flat().map(l2shaderline) ?? [],
           },
+          radius: { value: 1.0 },
+          smoothing: { value: 1.6 },
         }}
         fragmentShader={shaderCode}
       />
@@ -116,6 +130,8 @@ const WebGLCanvas: React.FC<Props> = (props) => {
           width={props.width}
           height={props.height}
           lines={props.lines}
+          radius={props.radius}
+          smoothing={props.smoothing}
         />
       </Suspense>
     </Canvas>

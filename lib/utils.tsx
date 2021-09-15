@@ -1,6 +1,7 @@
 import { GenerationOptions, loadSync } from 'text-to-svg';
 import simplify from 'simplify-js';
 import { svgPathProperties } from 'svg-path-properties';
+import skmeans from 'skmeans';
 import type { Line2D as Line, Point } from './types';
 
 const EPSILON = 0.01;
@@ -59,6 +60,24 @@ const discretizePath = (pathSegments: string[], count: number): Point[][] => {
   }
 
   return output;
+};
+
+const clamp = (val: number, min: number, max: number) => Math.max(Math.min(val, max), min);
+
+const cluster = (lines: Point[][], percentage = 0.5): Point[][] => {
+  const data = lines.flat().map(({ x, y }) => [x, y]);
+  const clusterCount = Math.floor(data.length * clamp(percentage, 0.0, 1.0));
+  const res = skmeans(data, clusterCount);
+  let i = 0;
+  lines.map((ls) =>
+    ls.map((l) => {
+      const centroid = res.centroids[res.idxs[i++]] as number[];
+      l.x = centroid[0];
+      l.y = centroid[1];
+      return l;
+    })
+  );
+  return lines;
 };
 
 const simplifyPath = (lines: Point[][], tolerance: number): Point[][] =>

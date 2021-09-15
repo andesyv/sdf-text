@@ -3,18 +3,18 @@
 #define MAX_STEPS 100
 #define EPS 0.01
 #define LINE_COUNT @LINE_COUNT@
-#define SMOOTH_STEP 0.5
 const float tanCoefficients = 0.5 * (PI / 180.0);
 
 struct Line {
     vec3 start;
     vec3 end;
-    float radius;
 };
 
+uniform Line lines[LINE_COUNT];
 uniform vec3 iResolution;
 uniform float iTime;
-uniform Line lines[LINE_COUNT];
+uniform float radius;
+uniform float smoothing;
 
 mat4 perspective(float n, float f, float aspect, float FOV) {
     float S = 1.0 / tan(FOV * tanCoefficients);
@@ -57,7 +57,7 @@ float sdf(Line l, vec3 p) {
     float t = dot(p - l.start, ab) / dot(ab, ab);
     t = clamp(t, 0., 1.0);
     vec3 closest = l.start + t * ab;
-    return length(closest - p) - l.radius;
+    return length(closest - p) - radius;
 }
 
 vec3 gradient(Line l, vec3 p) {
@@ -109,19 +109,17 @@ void mainImage(out vec4 fragColor, in vec2 texCoords) {
         vec3 p = ro.xyz + ro.w * rd.xyz;
 
         float dist = farDist;
-        int closestId = 0;
-        vec3 g;
         vec3 forwarddiff = vec3(farDist);
 
         for (int j = 0; j < LINE_COUNT; j++)
-            dist = smin(sdf(lines[j], p), dist, SMOOTH_STEP);
+            dist = smin(sdf(lines[j], p), dist, smoothing);
 
         if (dist < EPS) {
             // Calculate gradient using forward differences
             for (int j = 0; j < LINE_COUNT; j++) {
-                forwarddiff.x = smin(forwarddiff.x, sdf(lines[j], vec3(p.x+EPS, p.y, p.z)), SMOOTH_STEP);
-                forwarddiff.y = smin(forwarddiff.y, sdf(lines[j], vec3(p.x, p.y+EPS, p.z)), SMOOTH_STEP);
-                forwarddiff.z = smin(forwarddiff.z, sdf(lines[j], vec3(p.x, p.y, p.z+EPS)), SMOOTH_STEP);
+                forwarddiff.x = smin(forwarddiff.x, sdf(lines[j], vec3(p.x+EPS, p.y, p.z)), smoothing);
+                forwarddiff.y = smin(forwarddiff.y, sdf(lines[j], vec3(p.x, p.y+EPS, p.z)), smoothing);
+                forwarddiff.z = smin(forwarddiff.z, sdf(lines[j], vec3(p.x, p.y, p.z+EPS)), smoothing);
             }
             vec3 g = forwarddiff - vec3(dist);
 

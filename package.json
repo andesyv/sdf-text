@@ -15,6 +15,7 @@
     "react": "17.0.2",
     "react-dom": "17.0.2",
     "simplify-js": "https://github.com/mourner/simplify-js#v1.2.4",
+    "skmeans": "^0.11.3",
     "svg-path-properties": "^1.0.11",
     "text-to-svg": "^3.1.5",
     "three": "^0.132.2"
@@ -22,6 +23,7 @@
   "devDependencies": {
     "@types/luxon": "^2.0.3",
     "@types/react": "17.0.20",
+    "@types/skmeans": "^0.11.2",
     "@types/text-to-svg": "^3.1.1",
     "@types/three": "^0.131.0",
     "@typescript-eslint/eslint-plugin": "^4.31.0",

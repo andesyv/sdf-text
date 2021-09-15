@@ -276,6 +276,11 @@
   resolved "https://registry.yarnpkg.com/@types/scheduler/-/scheduler-0.16.2.tgz#1a62f89525723dde24ba1b01b092bf5df8ad4d39"
   integrity sha512-hppQEBDmlwhFAXKJX2KnWLYu5yMfi91yazPb2l+lbJiwW+wdo1gNeRA+3RgNSO39WYX2euey41KEwnqesU2Jew==
 
+"@types/skmeans@^0.11.2":
+  version "0.11.2"
+  resolved "https://registry.yarnpkg.com/@types/skmeans/-/skmeans-0.11.2.tgz#33b74ff650a166ea86ae4644d8ce16c50a93e603"
+  integrity sha512-VFOatc1ITAAaYjslFTow+2qJckJROAa5eUvivcTZ4wnSLELFCVt3ezwC0ENl21A0SfqclhKeK4unthZ3uTBCCg==
+
 "@types/text-to-svg@^3.1.1":
   version "3.1.1"
   resolved "https://registry.yarnpkg.com/@types/text-to-svg/-/text-to-svg-3.1.1.tgz#c9bec66ad69f9c80bf690f01fd799532f1ebdcac"
@@ -3082,6 +3087,11 @@ side-channel@^1.0.4:
 "simplify-js@https://github.com/mourner/simplify-js#v1.2.4":
   version "1.2.4"
   resolved "https://github.com/mourner/simplify-js#4f566b7368d4f4be8a9db40608bba557a2b5f643"
+
+skmeans@^0.11.3:
+  version "0.11.3"
+  resolved "https://registry.yarnpkg.com/skmeans/-/skmeans-0.11.3.tgz#6d4dafb8058520a792c10bae9d9b953a6b6379f4"
+  integrity sha512-nccEnlSeOMNAYM9ETMSq+m15u8g0KRCIvH2an/ROTx4Igmci/j3oYHBPGdAeGjhR7knAVoIIQwr/wy2dN/eKQA==
 
 slash@^3.0.0:
   version "3.0.0"
