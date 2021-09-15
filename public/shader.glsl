@@ -3,6 +3,7 @@
 #define MAX_STEPS 100
 #define EPS 0.01
 #define LINE_COUNT @LINE_COUNT@
+#define SMOOTH_STEP 0.5
 const float tanCoefficients = 0.5 * (PI / 180.0);
 
 struct Line {
@@ -68,16 +69,16 @@ vec3 gradient(Line l, vec3 p) {
 }
 
 // polynomial smooth min (k = 0.1);
-float smin( float a, float b, float k )
+float smin( float a, float b, float k)
 {
-    float h = clamp( 0.5+0.5*(b-a)/k, 0.0, 1.0 );
-    return mix( b, a, h ) - k*h*(1.0-h);
+    float h = max( k-abs(a-b), 0.0 )/k;
+    return min( a, b ) - h*h*k*(1.0/4.0);
 }
 
 void mainImage(out vec4 fragColor, in vec2 texCoords) {
     vec2 uv = 2.0 * texCoords / iResolution.xy - 1.0;
     // vec2 mPos = 2.0 * iMouse.xy / iResolution.xy - 1.0;
-    vec2 mPos = vec2(sin(iTime * 0.1), 0.0);
+    vec2 mPos = vec2(sin(iTime * 0.5) * 0.4, 0.0);
 
     mat4 pMat = perspective(0.1, 100.0, iResolution.x / iResolution.y, 60.0);
     mat4 vMat = translate(mat4(quatToRot(
@@ -110,16 +111,20 @@ void mainImage(out vec4 fragColor, in vec2 texCoords) {
         float dist = farDist;
         int closestId = 0;
         vec3 g;
-        for (int j = 0; j < LINE_COUNT; j++) {
-            float d = sdf(lines[j], p);
-            dist = smin(d, dist, 0.5);
-            if (d < dist) {
-                closestId = j;
-            }
-        }
+        vec3 forwarddiff = vec3(farDist);
+
+        for (int j = 0; j < LINE_COUNT; j++)
+            dist = smin(sdf(lines[j], p), dist, SMOOTH_STEP);
 
         if (dist < EPS) {
-            vec3 g = gradient(lines[closestId], p);
+            // Calculate gradient using forward differences
+            for (int j = 0; j < LINE_COUNT; j++) {
+                forwarddiff.x = smin(forwarddiff.x, sdf(lines[j], vec3(p.x+EPS, p.y, p.z)), SMOOTH_STEP);
+                forwarddiff.y = smin(forwarddiff.y, sdf(lines[j], vec3(p.x, p.y+EPS, p.z)), SMOOTH_STEP);
+                forwarddiff.z = smin(forwarddiff.z, sdf(lines[j], vec3(p.x, p.y, p.z+EPS)), SMOOTH_STEP);
+            }
+            vec3 g = forwarddiff - vec3(dist);
+
             vec3 normal = normalize(g);
             vec3 lightDir = normalize(lightPos.xyz - p);
             vec3 phong = max(dot(normal, lightDir), 0.15) * vec3(0.0, 0.5, 1.0);
