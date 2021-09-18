@@ -2,16 +2,15 @@ import type { NextPage, GetServerSideProps } from 'next';
 import Head from 'next/head';
 import Image from 'next/image';
 import fs from 'fs';
-import { useState } from 'react';
 import { useRouter } from 'next/dist/client/router';
 
 import Input from '../components/input';
-import WebGLCanvas, { nestedCount } from '../components/webglcanvas';
+import WebGLCanvas from '../components/webglcanvas';
 import Sliders from '../components/sliders';
 
 import styles from '../styles/Home.module.css';
-import { queryParamFlatten, textToLines } from '../lib/utils';
-import { Line2D as Line, ShaderParameters, StatelessObj } from '../lib/types';
+import { nestedCount, queryParamFlatten, queryToNum, textToLines } from '../lib/utils';
+import { Line2D as Line, ShaderParameters } from '../lib/types';
 
 interface PageProps {
   shaderStr: string;
@@ -23,9 +22,6 @@ export const defaultSettings = {
   font: 'default',
   shaderParams: { radius: 0.2, smoothing: 0.2 } as ShaderParameters,
 };
-
-const queryToNum = (q: string | string[] | undefined) =>
-  q !== undefined ? parseFloat(q as string) : undefined;
 
 const Home: NextPage<PageProps> = ({ shaderStr, lines }) => {
   const router = useRouter();
@@ -50,10 +46,6 @@ const Home: NextPage<PageProps> = ({ shaderStr, lines }) => {
       </Head>
 
       <main className={styles.main}>
-        <h1 className={styles.title}>
-          Welcome to <a href="https://nextjs.org">Next.js!</a>
-        </h1>
-
         <Input
           text={queryParamFlatten(text, defaultSettings.text)}
           font={queryParamFlatten(font, defaultSettings.font)}

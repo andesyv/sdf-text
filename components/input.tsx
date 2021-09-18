@@ -1,7 +1,6 @@
 import React from 'react';
-import Router from 'next/router';
 
-export interface Props {
+interface Props {
   text: string;
   font: string;
   onSubmit?: (path: string) => void;
@@ -42,7 +41,7 @@ class Input extends React.PureComponent<Props, State> {
   render = (): JSX.Element => (
     <form onSubmit={this.handleSubmit}>
       <label>
-        Name:
+        Text:
         <input
           ref={this.inputRef}
           type="text"

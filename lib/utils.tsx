@@ -11,7 +11,15 @@ export const queryParamFlatten = (
   defaultVal: string
 ): string => (Array.isArray(query) ? query[0] : query ?? defaultVal);
 
-export const textToSVG = async (text: string, font: string): Promise<string> =>
+export const queryToNum = (q: string | string[] | undefined): number | undefined =>
+  q !== undefined ? parseFloat(q as string) : undefined;
+
+export const nestedCount = <T extends unknown>(list?: T[][]): number =>
+  list?.reduce((sum, l) => sum + l.length, 0) ?? 0;
+
+// -------------- Text -> path pipeline: ---------------------
+
+const textToSVG = async (text: string, font: string): Promise<string> =>
   new Promise<string>((resolve) => {
     // load()
     const converter = loadSync(font === 'default' ? undefined : font);

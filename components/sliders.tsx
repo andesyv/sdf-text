@@ -1,7 +1,8 @@
 import React from 'react';
+
 import { ShaderParameters } from '../lib/types';
 
-export interface Props {
+interface Props {
   onRadiusChanged?: (radius: number) => void;
   onSmoothingChanged?: (smoothing: number) => void;
   defaultParams: ShaderParameters;
