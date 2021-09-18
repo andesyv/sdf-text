@@ -11,7 +11,7 @@ import Sliders from '../components/sliders';
 
 import styles from '../styles/Home.module.css';
 import { queryParamFlatten, textToLines } from '../lib/utils';
-import type { Line2D as Line } from '../lib/types';
+import { Line2D as Line, ShaderParameters, StatelessObj } from '../lib/types';
 
 interface PageProps {
   shaderStr: string;
@@ -21,13 +21,13 @@ interface PageProps {
 export const defaultSettings = {
   text: 'Hello',
   font: 'default',
+  shaderParams: { radius: 0.2, smoothing: 0.2 } as ShaderParameters,
 };
 
 const Home: NextPage<PageProps> = ({ shaderStr, lines }) => {
   const router = useRouter();
   const { text, font } = router.query;
-  const [radius, setRadius] = useState(1.0);
-  const [smoothing, setSmoothing] = useState(1.0);
+  const shaderParams: ShaderParameters = defaultSettings.shaderParams;
 
   return (
     <div className={styles.container}>
@@ -46,14 +46,21 @@ const Home: NextPage<PageProps> = ({ shaderStr, lines }) => {
           text={queryParamFlatten(text, defaultSettings.text)}
           font={queryParamFlatten(font, defaultSettings.font)}
         />
-        <Sliders onRadiusChanged={setRadius} onSmoothingChanged={setSmoothing} />
+        <Sliders
+          onRadiusChanged={(r) => {
+            shaderParams.radius = r;
+          }}
+          onSmoothingChanged={(s) => {
+            shaderParams.smoothing = s;
+          }}
+          defaultParams={defaultSettings.shaderParams}
+        />
         <WebGLCanvas
           shaderCode={shaderStr}
           width={500}
           height={500}
           lines={lines.length ? lines : undefined}
-          radius={radius}
-          smoothing={smoothing}
+          shaderParams={shaderParams}
         />
       </main>
 

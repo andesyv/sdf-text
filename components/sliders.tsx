@@ -1,8 +1,10 @@
 import React from 'react';
+import { ShaderParameters } from '../lib/types';
 
 export interface Props {
   onRadiusChanged?: (radius: number) => void;
   onSmoothingChanged?: (smoothing: number) => void;
+  defaultParams: ShaderParameters;
 }
 
 interface State {
@@ -15,8 +17,8 @@ class Sliders extends React.PureComponent<Props, State> {
   constructor(props: Props) {
     super(props);
     this.state = {
-      radius: 1.0,
-      smoothing: 1.6,
+      radius: props.defaultParams.radius,
+      smoothing: props.defaultParams.smoothing,
     };
     this.handleRadiusChange.bind(this);
     this.handleSmoothingChange.bind(this);
@@ -46,18 +48,20 @@ class Sliders extends React.PureComponent<Props, State> {
         Radius:
         <input
           type="range"
-          min={0.1}
-          max={10.0}
+          min={0.01}
+          max={4.0}
+          step={0.01}
           onChange={this.handleRadiusChange}
           value={this.state.radius}
         />
         Smoothing:
         <input
           type="range"
-          min={0.1}
-          max={10.0}
-          onChange={this.handleRadiusChange}
-          value={this.state.radius}
+          min={0.01}
+          max={4.0}
+          step={0.01}
+          onChange={this.handleSmoothingChange}
+          value={this.state.smoothing}
         />
       </label>
     </form>

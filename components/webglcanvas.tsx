@@ -2,7 +2,7 @@ import React, { Suspense } from 'react';
 import * as Three from 'three';
 import { Canvas, extend, ShaderMaterialProps, useFrame } from '@react-three/fiber';
 import { DateTime, Interval } from 'luxon';
-import { Line2D } from '../lib/types';
+import { Line2D, ShaderParameters } from '../lib/types';
 
 export interface Line {
   from: Three.Vector3;
@@ -14,8 +14,7 @@ export interface Props {
   width: number;
   height: number;
   lines?: Line2D[][];
-  radius: number;
-  smoothing: number;
+  shaderParams: ShaderParameters;
 }
 
 interface ImagePlaneProps {
@@ -23,8 +22,7 @@ interface ImagePlaneProps {
   width: number;
   height: number;
   lines?: Line2D[][];
-  radius: number;
-  smoothing: number;
+  shaderParams: ShaderParameters;
 }
 
 interface ShaderLine {
@@ -58,8 +56,7 @@ const ImagePlane: React.FC<ImagePlaneProps> = ({
   width,
   height,
   lines,
-  radius,
-  smoothing,
+  shaderParams,
 }) => {
   const ref = React.createRef<ShaderMaterialProps>();
   const start = DateTime.now();
@@ -68,8 +65,8 @@ const ImagePlane: React.FC<ImagePlaneProps> = ({
       ref.current.uniforms.iTime.value = Interval.fromDateTimes(start, DateTime.now()).length(
         'seconds'
       );
-      ref.current.uniforms.radius.value = radius;
-      ref.current.uniforms.smoothing.value = smoothing;
+      ref.current.uniforms.radius.value = shaderParams.radius;
+      ref.current.uniforms.smoothing.value = shaderParams.smoothing;
     }
   });
   return (
@@ -83,8 +80,8 @@ const ImagePlane: React.FC<ImagePlaneProps> = ({
           lines: {
             value: lines?.flat().map(l2shaderline) ?? [],
           },
-          radius: { value: 1.0 },
-          smoothing: { value: 1.6 },
+          radius: { value: shaderParams.radius },
+          smoothing: { value: shaderParams.smoothing },
         }}
         fragmentShader={shaderCode}
       />
@@ -130,8 +127,7 @@ const WebGLCanvas: React.FC<Props> = (props) => {
           width={props.width}
           height={props.height}
           lines={props.lines}
-          radius={props.radius}
-          smoothing={props.smoothing}
+          shaderParams={props.shaderParams}
         />
       </Suspense>
     </Canvas>
