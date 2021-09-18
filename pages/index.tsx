@@ -12,6 +12,8 @@ import styles from '../styles/Home.module.css';
 import { nestedCount, queryParamFlatten, queryToNum, textToLines } from '../lib/utils';
 import { Line2D as Line, ShaderParameters } from '../lib/types';
 
+import shadercode from 'raw-loader!../shader.glsl';
+
 interface PageProps {
   shaderStr: string;
   lines: Line[][];
@@ -90,20 +92,16 @@ export const getServerSideProps: GetServerSideProps<PageProps> = async ({ params
   const text = queryParamFlatten(queryParams.text, defaultSettings.text);
   // TODO: Fill in font fetching logic
   const font = queryParamFlatten(queryParams.font, defaultSettings.font);
+
   const convertedLines = await textToLines(text, font, 100, 2.4);
   const lineCount = nestedCount(convertedLines);
-  console.log(`Line count: ${lineCount}`);
 
-  // Would want this part in getStaticProps, but Next.js doesn't support it together with getServerSideProps
-  const shader = new Promise<string>((resolve, reject) => {
-    fs.readFile(`${process.cwd()}/public/shader.glsl`, (err, data) => {
-      if (err) reject(err);
-      const file = data.toString();
-      resolve(file.replace('@LINE_COUNT@', lineCount.toString()));
-    });
-  });
-
-  return { props: { shaderStr: await shader, lines: convertedLines } };
+  return {
+    props: {
+      shaderStr: shadercode.replace('@LINE_COUNT@', lineCount.toString()),
+      lines: convertedLines,
+    },
+  };
 };
 
 export default Home;
