@@ -72,6 +72,7 @@ const discretizePath = (pathSegments: string[], count: number): Point[][] => {
 
 const clamp = (val: number, min: number, max: number) => Math.max(Math.min(val, max), min);
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const cluster = (lines: Point[][], percentage = 0.5): Point[][] => {
   const data = lines.flat().map(({ x, y }) => [x, y]);
   const clusterCount = Math.floor(data.length * clamp(percentage, 0.0, 1.0));
