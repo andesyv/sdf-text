@@ -4,6 +4,7 @@ import Router from 'next/router';
 export interface Props {
   text: string;
   font: string;
+  onSubmit?: (path: string) => void;
 }
 
 interface State {
@@ -29,7 +30,7 @@ class Input extends React.PureComponent<Props, State> {
   };
 
   handleSubmit: React.FormEventHandler<HTMLFormElement> = (ev) => {
-    void Router.push(`/${this.state.value}`);
+    this.props.onSubmit?.(this.state.value);
     ev.preventDefault();
   };
 

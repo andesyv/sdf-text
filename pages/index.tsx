@@ -24,10 +24,22 @@ export const defaultSettings = {
   shaderParams: { radius: 0.2, smoothing: 0.2 } as ShaderParameters,
 };
 
+const queryToNum = (q: string | string[] | undefined) =>
+  q !== undefined ? parseFloat(q as string) : undefined;
+
 const Home: NextPage<PageProps> = ({ shaderStr, lines }) => {
   const router = useRouter();
-  const { text, font } = router.query;
-  const shaderParams: ShaderParameters = defaultSettings.shaderParams;
+  const { text, font, radius, smoothing } = router.query;
+  const shaderParams: ShaderParameters = {
+    radius: queryToNum(radius) ?? defaultSettings.shaderParams.radius,
+    smoothing: queryToNum(smoothing) ?? defaultSettings.shaderParams.smoothing,
+  };
+
+  const refreshPath = (path: string): void => {
+    // Hacky way of setting path because Next.js Routers didn't work
+    const base = window.location.href.slice(0, window.location.href.lastIndexOf('/'));
+    window.location.href = `${base}/${path}?radius=${shaderParams.radius}&smoothing=${shaderParams.smoothing}`;
+  };
 
   return (
     <div className={styles.container}>
@@ -45,6 +57,7 @@ const Home: NextPage<PageProps> = ({ shaderStr, lines }) => {
         <Input
           text={queryParamFlatten(text, defaultSettings.text)}
           font={queryParamFlatten(font, defaultSettings.font)}
+          onSubmit={refreshPath}
         />
         <Sliders
           onRadiusChanged={(r) => {
@@ -53,7 +66,7 @@ const Home: NextPage<PageProps> = ({ shaderStr, lines }) => {
           onSmoothingChanged={(s) => {
             shaderParams.smoothing = s;
           }}
-          defaultParams={defaultSettings.shaderParams}
+          defaultParams={shaderParams}
         />
         <WebGLCanvas
           shaderCode={shaderStr}
